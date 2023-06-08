@@ -1,0 +1,40 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+exporters:
+  datadog:
+    api:
+      site: us5.datadoghq.com
+      key: "618357a818063cb27190d0fb744dcba5"
+  
+  elasticsearch: 
+    index: 'outbox'
+    tls:
+        insecure: true
+    endpoints: 
+      - "http://host.docker.internal:9200"
+
+processors:
+  batch:
+
+extensions:
+  health_check:
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [datadog]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [datadog]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch]
